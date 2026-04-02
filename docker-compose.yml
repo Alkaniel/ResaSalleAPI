@@ -1,0 +1,9 @@
+services:
+  api:
+    image: resasalle-api:latest
+    container_name: resasalle-api
+    restart: unless-stopped
+    ports:
+      - "4003:4003"
+    env_file:
+      - .env
