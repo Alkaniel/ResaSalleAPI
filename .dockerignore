@@ -1,0 +1,48 @@
+# ==========================================
+# GESTIONNAIRE DE VERSIONS
+# ==========================================
+.git
+.gitignore
+HELP.md
+
+# ==========================================
+# FICHIERS IDE
+# ==========================================
+.idea/
+*.iml
+*.iws
+*.ipr
+.vscode/
+.settings/
+.classpath
+.project
+.apt_generated/
+.factorypath
+.springBeans
+
+# ==========================================
+# BUILD MAVEN
+# ==========================================
+target/
+build/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+
+# ==========================================
+# LOGS ET JUNK OS
+# ==========================================
+*.log
+.DS_Store
+.AppleDouble
+.LSOverride
+Thumbs.db
+ehthumbs.db
+
+# ==========================================
+# SECRETS ET VARIABLES D'ENVIRONNEMENT
+# ==========================================
+*.env
+*.env.*
+local.env
