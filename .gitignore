@@ -31,3 +31,27 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### OS JUNK FILES ###
+.DS_Store
+.AppleDouble
+.LSOverride
+Thumbs.db
+ehthumbs.db
+$RECYCLE.BIN/
+
+### LOGS ###
+*.log
+
+### MAVEN BACKUPS ###
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+
+### SECRETS ###
+*.env
+*.env.*
+
+### TESTS ###
+test.http
