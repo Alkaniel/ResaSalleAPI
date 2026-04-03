@@ -29,73 +29,61 @@ public class UserController {
     public ResponseEntity<User> getCurrentUser(Authentication authentication) {
         User user = userRepository.findByEmail(authentication.getName())
                 .orElseThrow(() -> new IllegalArgumentException("Utilisateur introuvable"));
-
         return ResponseEntity.ok(user);
     }
-
 
     @GetMapping
     @PreAuthorize("hasAnyAuthority('MANAGER', 'SUPER_ADMIN')")
     public ResponseEntity<List<User>> getAllUsers() {
-        List<User> users = userRepository.findAll();
-        return ResponseEntity.ok(users);
+        return ResponseEntity.ok(userRepository.findAll());
     }
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAnyAuthority('MANAGER', 'SUPER_ADMIN')")
     public ResponseEntity<Void> deleteUser(@PathVariable UUID id) {
-        if (!userRepository.existsById(id)) {
-            return ResponseEntity.notFound().build();
-        }
+        if (!userRepository.existsById(id)) return ResponseEntity.notFound().build();
         userRepository.deleteById(id);
         return ResponseEntity.noContent().build();
     }
 
+    public record UserDTO(String firstName, String lastName, String email, String password, Role role) {}
+
     @PostMapping
     @PreAuthorize("hasAnyAuthority('MANAGER', 'SUPER_ADMIN')")
-    public ResponseEntity<User> createUser(@RequestBody User requestUser) {
-        Optional<User> existingUser = userRepository.findByEmail(requestUser.getEmail());
+    public ResponseEntity<User> createUser(@RequestBody UserDTO request) {
+        Optional<User> existingUser = userRepository.findByEmail(request.email());
         if (existingUser.isPresent()) {
             return ResponseEntity.status(409).build();
         }
 
         User newUser = User.builder()
-                .firstName(requestUser.getFirstName())
-                .lastName(requestUser.getLastName())
-                .email(requestUser.getEmail())
-                .password(passwordEncoder.encode(requestUser.getPassword()))
-                .role(requestUser.getRole() != null ? requestUser.getRole() : Role.USER)
+                .firstName(request.firstName())
+                .lastName(request.lastName())
+                .email(request.email())
+                .password(passwordEncoder.encode(request.password()))
+                .role(request.role() != null ? request.role() : Role.USER)
                 .build();
 
         newUser.setActive(true);
-
-        User savedUser = userRepository.save(newUser);
-        return ResponseEntity.ok(savedUser);
+        return ResponseEntity.ok(userRepository.save(newUser));
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyAuthority('MANAGER', 'SUPER_ADMIN')")
-    public ResponseEntity<User> updateUser(@PathVariable UUID id, @RequestBody User userDetails) {
+    public ResponseEntity<User> updateUser(@PathVariable UUID id, @RequestBody UserDTO request) {
         Optional<User> optionalUser = userRepository.findById(id);
-
-        if (optionalUser.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
+        if (optionalUser.isEmpty()) return ResponseEntity.notFound().build();
 
         User existingUser = optionalUser.get();
+        if (request.firstName() != null) existingUser.setFirstName(request.firstName());
+        if (request.lastName() != null) existingUser.setLastName(request.lastName());
+        if (request.email() != null) existingUser.setEmail(request.email());
+        if (request.role() != null) existingUser.setRole(request.role());
 
-        existingUser.setFirstName(userDetails.getFirstName());
-        existingUser.setLastName(userDetails.getLastName());
-        existingUser.setEmail(userDetails.getEmail());
-        existingUser.setRole(userDetails.getRole());
-        existingUser.setActive(userDetails.isActive());
-
-        if (userDetails.getPassword() != null && !userDetails.getPassword().isBlank()) {
-            existingUser.setPassword(passwordEncoder.encode(userDetails.getPassword()));
+        if (request.password() != null && !request.password().isBlank()) {
+            existingUser.setPassword(passwordEncoder.encode(request.password()));
         }
 
-        User updatedUser = userRepository.save(existingUser);
-
-        return ResponseEntity.ok(updatedUser);
+        return ResponseEntity.ok(userRepository.save(existingUser));
     }
 }
