@@ -1,5 +1,6 @@
 package fr.enzogiardinelli.rsa.api.user.controller;
 
+import fr.enzogiardinelli.rsa.api.user.model.Role;
 import fr.enzogiardinelli.rsa.api.user.model.User;
 import fr.enzogiardinelli.rsa.api.user.repository.UserRepository;
 import org.springframework.http.ResponseEntity;
@@ -52,16 +53,23 @@ public class UserController {
 
     @PostMapping
     @PreAuthorize("hasAnyAuthority('MANAGER', 'SUPER_ADMIN')")
-    public ResponseEntity<User> createUser(@RequestBody User user) {
-        Optional<User> existingUser = userRepository.findByEmail(user.getEmail());
+    public ResponseEntity<User> createUser(@RequestBody User requestUser) {
+        Optional<User> existingUser = userRepository.findByEmail(requestUser.getEmail());
         if (existingUser.isPresent()) {
             return ResponseEntity.status(409).build();
         }
 
-        user.setActive(true);
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        User newUser = User.builder()
+                .firstName(requestUser.getFirstName())
+                .lastName(requestUser.getLastName())
+                .email(requestUser.getEmail())
+                .password(passwordEncoder.encode(requestUser.getPassword()))
+                .role(requestUser.getRole() != null ? requestUser.getRole() : Role.USER)
+                .build();
 
-        User savedUser = userRepository.save(user);
+        newUser.setActive(true);
+
+        User savedUser = userRepository.save(newUser);
         return ResponseEntity.ok(savedUser);
     }
 
