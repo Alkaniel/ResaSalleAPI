@@ -58,6 +58,7 @@ public class UserController {
             return ResponseEntity.status(409).build();
         }
 
+        user.setActive(true);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
 
         User savedUser = userRepository.save(user);
