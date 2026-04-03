@@ -4,6 +4,7 @@ import fr.enzogiardinelli.rsa.api.user.model.User;
 import fr.enzogiardinelli.rsa.api.user.repository.UserRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,7 +14,6 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/users")
-@PreAuthorize("hasRole('MANAGER') || hasRole('SUPER_ADMIN')")
 public class UserController {
 
     private final UserRepository userRepository;
@@ -24,13 +24,24 @@ public class UserController {
         this.passwordEncoder = passwordEncoder;
     }
 
+    @GetMapping("/me")
+    public ResponseEntity<User> getCurrentUser(Authentication authentication) {
+        User user = userRepository.findByEmail(authentication.getName())
+                .orElseThrow(() -> new IllegalArgumentException("Utilisateur introuvable"));
+
+        return ResponseEntity.ok(user);
+    }
+
+
     @GetMapping
+    @PreAuthorize("hasAnyAuthority('MANAGER', 'SUPER_ADMIN')")
     public ResponseEntity<List<User>> getAllUsers() {
         List<User> users = userRepository.findAll();
         return ResponseEntity.ok(users);
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyAuthority('MANAGER', 'SUPER_ADMIN')")
     public ResponseEntity<Void> deleteUser(@PathVariable UUID id) {
         if (!userRepository.existsById(id)) {
             return ResponseEntity.notFound().build();
@@ -40,10 +51,11 @@ public class UserController {
     }
 
     @PostMapping
+    @PreAuthorize("hasAnyAuthority('MANAGER', 'SUPER_ADMIN')")
     public ResponseEntity<User> createUser(@RequestBody User user) {
         Optional<User> existingUser = userRepository.findByEmail(user.getEmail());
         if (existingUser.isPresent()) {
-            return ResponseEntity.status(409).build(); // 409 Conflict
+            return ResponseEntity.status(409).build();
         }
 
         user.setPassword(passwordEncoder.encode(user.getPassword()));
@@ -53,6 +65,7 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasAnyAuthority('MANAGER', 'SUPER_ADMIN')")
     public ResponseEntity<User> updateUser(@PathVariable UUID id, @RequestBody User userDetails) {
         Optional<User> optionalUser = userRepository.findById(id);
 
