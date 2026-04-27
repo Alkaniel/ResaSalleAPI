@@ -21,11 +21,11 @@ jobs:
         run: docker save -o api-image.tar resasalle-api:latest
 
       - name: Transfer Image to API Server
-        run: scp -o StrictHostKeyChecking=no api-image.tar docker-compose.yml resasalle-api@10.10.10.43:/opt/resasalleapi/
+        run: scp -o StrictHostKeyChecking=no api-image.tar docker-compose.yml resasalle-api@10.0.0.43:/opt/resasalleapi/
 
       - name: Deploy on API Server
         run: |
-          ssh -o StrictHostKeyChecking=no resasalle-api@10.10.10.43 << 'EOF'
+          ssh -o StrictHostKeyChecking=no resasalle-api@10.0.0.43 << 'EOF'
             cd /opt/resasalleapi
             docker load -i api-image.tar
             docker compose up -d
