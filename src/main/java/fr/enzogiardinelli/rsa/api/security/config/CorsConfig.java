@@ -18,9 +18,8 @@ public class CorsConfig {
         // 🔥 L'astuce est ici : on utilise setAllowedOriginPatterns
         config.setAllowedOriginPatterns(Arrays.asList(
                 "http://localhost:5173",
-                "http://localhost:3000",
-                "http://10.66.66.*:*",         // Autorise n'importe quelle IP du VPN sur n'importe quel port !
-                "http://10.10.10.*:*"         // Autorise n'importe quelle IP du VPN sur n'importe quel port !
+                "http://localhost:4004",
+                "https://room-book.enzo-giardinelli.fr"
         ));
 
         config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
